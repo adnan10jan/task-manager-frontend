@@ -9,15 +9,12 @@ export default function Signup() {
   const nav = useNavigate();
 
   const submit = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/auth/signup", { username, email, password });
-      alert("Registered — please login");
-      nav("/login");
-    } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
-    }
-  };
+  e.preventDefault();
+  await new Promise(r => setTimeout(r, 300)); // simulate latency
+  alert('Registered successfully (mock)');
+  nav('/login');
+};
+
 
   return (
     <div>
