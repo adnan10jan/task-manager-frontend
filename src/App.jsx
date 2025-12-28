@@ -1,36 +1,32 @@
-import React from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { isLoggedIn, logout, getUsername } from "./services/auth";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Tasks from "./pages/Tasks";
 
-export default function App() {
-  const nav = useNavigate();
-  const handleLogout = () => {
-    logout();
-    nav("/login");
-  };
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("accessToken");
+  return token ? children : <Navigate to="/login" />;
+};
 
+function App() {
   return (
-    <div className="app">
-      <header className="header">
-        <h1>Task Manager</h1>
-        <nav>
-          {isLoggedIn() ? (
-            <>
-              <span className="user">{getUsername()}</span>
-              <button onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">Login</Link>
-              <Link to="/signup">Signup</Link>
-            </>
-          )}
-        </nav>
-      </header>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-      <main className="main">
-        <Outlet />
-      </main>
-    </div>
+      <Route
+        path="/tasks"
+        element={
+          <PrivateRoute>
+            <Tasks />
+          </PrivateRoute>
+        }
+      />
+
+      {/* default */}
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
   );
 }
+
+export default App;

@@ -1,47 +1,56 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { saveToken, saveUsername } from "../services/auth";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-export default function Login() {
+function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const nav = useNavigate();
+  const navigate = useNavigate();
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
-      const res = await api.post("/auth/login", { username, password });
-      const { token, username: name } = res.data;
-      saveToken(token);
-      saveUsername(name || username);
-      nav("/tasks");
+      const res = await api.post("/auth/login", {
+        username,
+        password,
+      });
+
+      console.log("FULL RESPONSE:", res.data);
+
+      const accessToken = res.data.accessToken || res.data.data?.accessToken;
+      const refreshToken = res.data.refreshToken || res.data.data?.refreshToken;
+
+      if (!accessToken) {
+        throw new Error("Access token missing");
+      }
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      console.log("TOKEN STORED:", accessToken);
+
+      navigate("/tasks");
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert("Invalid credentials");
+      console.error(err);
     }
   };
 
   return (
     <div>
-      <h2>Login</h2>
-      <form className="form" onSubmit={submit}>
-        <input
-          className="input"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="username"
-        />
-        <input
-          className="input"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="password"
-        />
-        <button className="button" type="submit">
-          Login
-        </button>
-      </form>
+      <input
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleLogin}>Login</button>
     </div>
   );
 }
+
+export default Login;

@@ -1,6 +1,10 @@
-export function saveToken(token) { localStorage.setItem('token', token) }
-export function getToken(){ return localStorage.getItem('token') }
-export function logout(){ localStorage.removeItem('token'); localStorage.removeItem('username') }
-export function isLoggedIn(){ return !!getToken() }
-export function saveUsername(u){ localStorage.setItem('username', u) }
-export function getUsername(){ return localStorage.getItem('username') }
+import api from "./api";
+
+export const signup = (data) => api.post("/auth/signup", data);
+
+export const login = (data) => api.post("/auth/login", data);
+
+export const logout = () => api.post("/auth/logout");
+
+export const refreshToken = (refreshToken) =>
+  api.post("/auth/refresh", { refreshToken });
