@@ -1,11 +1,13 @@
 import authApi from "../services/authApi";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // 🔥 IMPORTANT
 
   const handleLogin = async () => {
     try {
@@ -14,14 +16,18 @@ function Login() {
         password,
       });
 
-      const token = res.data.data.accessToken;
-      const refresh = res.data.data.refreshToken;
+      const data = res.data.data;
 
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("refreshToken", refresh);
+      // ✅ SINGLE SOURCE OF TRUTH
+      login({
+        username: data.username,
+        roles: data.roles,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
 
       navigate("/tasks");
-    } catch (err) {
+    } catch {
       alert("Invalid credentials");
     }
   };
@@ -47,10 +53,21 @@ function Login() {
 
       <button
         onClick={handleLogin}
-        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
       >
         Login
       </button>
+
+      {/* ✅ SIGNUP LINK (RESTORED) */}
+      <p className="text-center text-sm text-gray-600 mt-4">
+        New user?{" "}
+        <span
+          onClick={() => navigate("/signup")}
+          className="text-indigo-600 font-medium cursor-pointer hover:underline"
+        >
+          Create account
+        </span>
+      </p>
     </div>
   );
 }
